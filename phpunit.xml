@@ -1,0 +1,17 @@
+<phpunit bootstrap="./test/Bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="MongoObject tests">
+            <directory>./test</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+      <blacklist>
+        <directory>vendor</directory>
+        <directory>test</directory>
+      </blacklist>
+    </filter>
+    <logging>
+      <log type="coverage-text" target="php://stdout" showUncoveredFiles="true" />
+      <log type="coverage-html" target="report" lowUpperBound="35" highLowerBound="70"/>
+    </logging>
+</phpunit>
