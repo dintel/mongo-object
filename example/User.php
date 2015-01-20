@@ -8,7 +8,7 @@ namespace MongoObjectExample;
 use MongoObject\Object;
 use MongoCollection;
 
-class User extends Object
+class User extends Object implements MongoObject\MongoObject;
 {
     public function __construct(array $data, MongoCollection $collection)
     {
