@@ -134,7 +134,7 @@ class Mapper
      * @param array $data initial values of properties of new object
      * @return mixed new object of class $type or null of class $type does not exist
      */
-    public function newObject($table, $type, $data)
+    public function newObject($table, $type, array $data = array())
     {
         $type = $this->getFullType($type);
         if (class_exists($type)) {
