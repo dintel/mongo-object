@@ -1,7 +1,6 @@
 {
     "name": "dintel/mongo-object",
     "description": "A set of classes that simplify storage of PHP objects in MongoDB",
-    "version": "0.1.0",
     "keywords": ["mongo"],
     "license": "BSD-3-Clause",
     "authors": [
