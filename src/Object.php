@@ -271,7 +271,7 @@ class Object implements JsonSerializable
      */
     protected function fetchDBRef($collectionName, $typeName, $dbref)
     {
-    	$typeName = static::getFullType($typeName);
+    	$typeName = $this->getFullType($typeName);
         $collection = $this->_collection->db->$collectionName;
         if ($dbref === null) {
         	return null;

@@ -69,7 +69,7 @@ class Mapper
         if ($data === null) {
             return null;
         }
-        return new $type($data,$this->mongodb->$table);
+        return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
     }
 
     /**
@@ -87,7 +87,7 @@ class Mapper
         if ($data === null) {
             return null;
         }
-        return new $type($data, $this->mongodb->$table);
+        return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
     }
 
     /**
@@ -108,7 +108,7 @@ class Mapper
         }
         $result = [];
         foreach ($cursor as $data) {
-            $obj = new $type($data, $this->mongodb->$table);
+            $obj = new $type($data, $this->mongodb->$table, $this->modelsNamespace);
             $result[] = $obj;
         }
         return $result;
@@ -138,7 +138,7 @@ class Mapper
     {
         $type = $this->getFullType($type);
         if (class_exists($type)) {
-            return new $type($data, $this->mongodb->$table);
+            return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
         }
         return null;
     }
