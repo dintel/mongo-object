@@ -32,7 +32,13 @@ class MapperFactory implements FactoryInterface
     {
         $config = $serviceLocator->get('config')['mongoObjectMapper'];
         $client = self::constructMongoClient(@$config['uri'], @$config['options']);
-        return new Mapper($client->selectDb($config['database']), @$config['modelsNamespace']);
+
+        $mapperClass = "MongoObject\Mapper";
+        if (isset($config['mapperClass'])) {
+            $mapperClass = $config['mapperClass'];
+        }
+
+        return new $mapperClass($client->selectDb($config['database']), @$config['modelsNamespace']);
     }
 
     /**
