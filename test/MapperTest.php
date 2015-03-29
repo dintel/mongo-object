@@ -84,6 +84,11 @@ class MapperTest extends AbstractTestCase
         $this->assertNull($user);
     }
 
+    public function testMagicGet()
+    {
+        $this->assertInstanceOf('MongoDB', $this->mapper->mongodb);
+    }
+
     public function testFetchObjects()
     {
         $users = $this->mapper->fetchObjects('users', 'User', ['type' => User::TYPE_ADMIN]);

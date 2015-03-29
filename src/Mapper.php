@@ -39,6 +39,16 @@ class Mapper
     }
 
     /**
+     * Getter for all properties
+     * @param string $name name of property to retrieve
+     * @return mixed value of property
+     */
+    public function __get($name)
+    {
+        return $this->$name;
+    }
+
+    /**
      * Add models namespace to type, if it is not null
      * @param string $type type name
      * @return string type name prepended with models namespace if it is not null
