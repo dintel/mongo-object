@@ -27,7 +27,7 @@ class UserTest extends AbstractTestCase
 
     public function testCreate()
     {
-        $user = new User($this->data, $this->collection);
+        $user = new User($this->data, $this->collection, 'MongoObjectTest');
         $this->assertNull($user->_id);
         $this->assertSame($this->data['login'], $user->login);
         $this->assertSame($this->data['type'], $user->type);
@@ -157,6 +157,7 @@ class UserTest extends AbstractTestCase
         $user->manager = $user->getDBRef();
         $user->save();
         $manager = $user->getManager();
+        $this->assertAttributeSame('MongoObjectTest', '_modelsNamespace', $manager);
         $this->assertTrue(MongoDBRef::isRef($user->manager));
         $this->assertInstanceOf('MongoObjectTest\User', $manager);
         $this->assertEquals($user->manager, $manager->manager);

@@ -280,7 +280,7 @@ class Object implements JsonSerializable
         if ($data === null) {
         	return null;
         }
-        return new $typeName($data, $collection);
+        return new $typeName($data, $collection, $this->_modelsNamespace);
     }
 
     /**

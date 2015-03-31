@@ -15,7 +15,7 @@ class User extends Object
     const TYPE_USER=1;
     const TYPE_GUEST=2;
 
-    public function __construct(array $data, MongoCollection $collection)
+    public function __construct(array $data, MongoCollection $collection, $modelsNamespace = null)
     {
         $schema = [
             '_id' => ['type' => Object::TYPE_ID, 'null' => false],
@@ -34,7 +34,7 @@ class User extends Object
             'groups' => [],
             'created' => new MongoDate(),
         ];
-        parent::__construct($schema, $data + $defaults, $collection, 'MongoObjectTest');
+        parent::__construct($schema, $data + $defaults, $collection, $modelsNamespace);
     }
 
     public function checkPassword($password)
