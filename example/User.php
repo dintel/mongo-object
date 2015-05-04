@@ -7,9 +7,10 @@ namespace MongoObjectExample;
 
 use MongoObject\Object;
 use MongoCollection;
+use MongoDate;
+use MongoObject\MapperObject;
 
-class User extends Object implements MongoObject\MongoObject;
-{
+class User extends Object implements MapperObject {
     public function __construct(array $data, MongoCollection $collection)
     {
         $schema = [

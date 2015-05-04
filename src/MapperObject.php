@@ -5,11 +5,13 @@
  */
 namespace MongoObject;
 
+use MongoCollection;
+
 /**
  * MongoObject interface must be implemented by all classes that derive from
  * Object if you use Mapper.
  */
-interface MongoObject
+interface MapperObject
 {
     public function __construct(array $data, MongoCollection $collection);
 }

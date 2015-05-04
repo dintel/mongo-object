@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
 
-namespace MongoObjectTest;
+namespace MongoObjecttest;
 
 use MongoClient;
 use MongoCollection;
@@ -51,8 +51,9 @@ abstract class AbstractTestCase extends TestCase
 
     public function tearDown()
     {
-        if($this->db !== null)
+        if ($this->db !== null) {
             $this->db->drop();
+        }
     }
 
     protected function seedCollection()
@@ -62,7 +63,7 @@ abstract class AbstractTestCase extends TestCase
             'type' => User::TYPE_ADMIN,
             'name' => 'Active admin user',
             'email' => 'admin@example.com',
-            'password' => hash('sha256','admin'),
+            'password' => hash('sha256', 'admin'),
             'active' => true,
         ]);
 
@@ -71,7 +72,7 @@ abstract class AbstractTestCase extends TestCase
             'type' => User::TYPE_GUEST,
             'name' => 'Inactive guest user',
             'email' => 'guest@example.com',
-            'password' => hash('sha256','guest'),
+            'password' => hash('sha256', 'guest'),
             'active' => false,
         ]);
 
@@ -80,7 +81,7 @@ abstract class AbstractTestCase extends TestCase
             'type' => User::TYPE_ADMIN,
             'name' => 'Activeless admin user',
             'email' => 'admin2@example.com',
-            'password' => hash('sha256','admin'),
+            'password' => hash('sha256', 'admin'),
         ]);
     }
 }

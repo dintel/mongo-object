@@ -3,7 +3,7 @@
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
-namespace MongoObjectTest;
+namespace MongoObjecttest;
 
 use MongoId;
 use MongoDate;
@@ -18,7 +18,7 @@ class MapperTest extends AbstractTestCase
             'login' => 'testuser',
             'type' => User::TYPE_USER,
             'name' => 'Test user',
-            'password' => hash('sha256','user'),
+            'password' => hash('sha256', 'user'),
             'active' => false,
             'age' => 22.5,
             'created' => new MongoDate(),

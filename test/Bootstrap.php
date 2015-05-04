@@ -4,13 +4,12 @@
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
 
-namespace MongoObjectTest;
+namespace MongoObjecttest;
 
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
 use RuntimeException;
-use MongoObject\MapperService;
 
 error_reporting(E_ALL | E_STRICT);
 chdir(__DIR__);

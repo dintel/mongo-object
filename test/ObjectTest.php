@@ -3,7 +3,7 @@
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
-namespace MongoObjectTest;
+namespace MongoObjecttest;
 
 use MongoObject\Object;
 
@@ -28,7 +28,7 @@ class ObjectTest extends AbstractTestCase
 
     public function testCreate()
     {
-        $obj = new Object($this->testSchema, ['login' => 'login', 'type' => 'someType' ,'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
+        $obj = new Object($this->testSchema, ['login' => 'login', 'type' => 'someType', 'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
         $this->assertNull($obj->_id);
         $this->assertSame("login", $obj->login);
         $this->assertSame("someType", $obj->type);
@@ -44,10 +44,10 @@ class ObjectTest extends AbstractTestCase
     public function testSave(Object $obj)
     {
         $this->assertTrue($obj->save());
-        $this->assertSame("",$obj->email);
+        $this->assertSame("", $obj->email);
         $obj->email = "test@test.com";
         $this->assertTrue($obj->save());
-        $this->assertSame("test@test.com",$obj->email);
+        $this->assertSame("test@test.com", $obj->email);
         return $obj;
     }
 
@@ -57,7 +57,7 @@ class ObjectTest extends AbstractTestCase
     public function testDelete(Object $obj)
     {
         $this->assertTrue($obj->delete());
-        $obj = new Object($this->testSchema, ['login' => 'login', 'type' => 'someType' ,'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
+        $obj = new Object($this->testSchema, ['login' => 'login', 'type' => 'someType', 'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
         $this->assertFalse($obj->delete());
     }
 
@@ -68,7 +68,7 @@ class ObjectTest extends AbstractTestCase
     {
         $badSchema = $this->testSchema;
         $badSchema['badProp'] = null;
-        $obj = new Object($badSchema, ['login' => 'login', 'type' => 'someType' ,'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
+        $obj = new Object($badSchema, ['login' => 'login', 'type' => 'someType', 'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
         echo $obj->badProp;
     }
 
@@ -79,7 +79,7 @@ class ObjectTest extends AbstractTestCase
     {
         $badSchema = $this->testSchema;
         $badSchema['badProp'] = ['type' => 100];
-        $obj = new Object($badSchema, ['login' => 'login', 'type' => 'someType' ,'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
+        $obj = new Object($badSchema, ['login' => 'login', 'type' => 'someType', 'name' => 'someone', 'password' => 'secret'] + $this->defaults, $this->collection);
         echo $obj->badProp;
     }
 }

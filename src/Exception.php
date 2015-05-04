@@ -6,4 +6,5 @@
 namespace MongoObject;
 
 class Exception extends \Exception
-{}
+{
+}

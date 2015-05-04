@@ -4,13 +4,13 @@
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
 
-namespace MongoObjectTest;
+namespace MongoObjecttest;
 
 use MongoObject\Mapper;
 
 class CustomMapper extends Mapper
 {
-    function customTestFunction()
+    public function customTestFunction()
     {
     }
 }

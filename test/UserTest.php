@@ -3,7 +3,7 @@
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
-namespace MongoObjectTest;
+namespace MongoObjecttest;
 
 use MongoDate;
 use MongoDBRef;
@@ -17,7 +17,7 @@ class UserTest extends AbstractTestCase
             'login' => 'testuser',
             'type' => User::TYPE_USER,
             'name' => 'Test user',
-            'password' => hash('sha256','user'),
+            'password' => hash('sha256', 'user'),
             'active' => false,
             'age' => 22.5,
             'created' => new MongoDate(),
@@ -104,7 +104,7 @@ class UserTest extends AbstractTestCase
         $this->assertTrue($user->save());
         $this->assertFalse($user->isNew());
         $this->assertInternalType('array', $user->getDBRef());
-        $this->assertInstanceOf('MongoId',$user->_id);
+        $this->assertInstanceOf('MongoId', $user->_id);
         $user->name = "Changed name";
         $this->assertTrue($user->save());
         $this->assertSame("Changed name", $user->name);
