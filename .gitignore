@@ -1,3 +1,6 @@
 composer.lock
 TAGS
 vendor/*
+.buildpath
+.project
+.settings
