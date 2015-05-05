@@ -3,7 +3,7 @@
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
-namespace MongoObjecttest;
+namespace MongoObjectTest;
 
 use MongoDate;
 use MongoDBRef;
@@ -27,7 +27,7 @@ class UserTest extends AbstractTestCase
 
     public function testCreate()
     {
-        $user = new User($this->data, $this->collection, 'MongoObjectTest');
+        $user = new User($this->data, $this->collection);
         $this->assertNull($user->_id);
         $this->assertSame($this->data['login'], $user->login);
         $this->assertSame($this->data['type'], $user->type);
@@ -105,9 +105,12 @@ class UserTest extends AbstractTestCase
         $this->assertFalse($user->isNew());
         $this->assertInternalType('array', $user->getDBRef());
         $this->assertInstanceOf('MongoId', $user->_id);
+        $id = $user->_id;
         $user->name = "Changed name";
+        $user->_id = (string) $id;
         $this->assertTrue($user->save());
         $this->assertSame("Changed name", $user->name);
+        $this->assertEquals($id, $user->_id);
         return $user;
     }
 
@@ -136,13 +139,20 @@ class UserTest extends AbstractTestCase
 
     public function testJson()
     {
-        $user = $this->mapper->findObjectByProp('users', 'User', 'login', 'guest');
+        $user = $this->mapper->findObjectByProp('User', 'login', 'guest');
         $json = json_encode($user);
         $arr = json_decode($json, true);
         $this->assertInternalType('string', $json);
         $this->assertInternalType('array', $arr);
         $this->assertArrayNotHasKey('_id', $arr);
         $this->assertArrayHasKey('id', $arr);
+        $user->_id = null;
+        $json = json_encode($user);
+        $arr = json_decode($json, true);
+        $this->assertInternalType('string', $json);
+        $this->assertInternalType('array', $arr);
+        $this->assertArrayNotHasKey('_id', $arr);
+        $this->assertArrayNotHasKey('id', $arr);
     }
 
     /**
@@ -157,11 +167,15 @@ class UserTest extends AbstractTestCase
         $user->manager = $user->getDBRef();
         $user->save();
         $manager = $user->getManager();
-        $this->assertAttributeSame('MongoObjectTest', '_modelsNamespace', $manager);
         $this->assertTrue(MongoDBRef::isRef($user->manager));
         $this->assertInstanceOf('MongoObjectTest\User', $manager);
         $this->assertEquals($user->manager, $manager->manager);
-        $admin2 = $this->mapper->findObjectByProp('users', 'User', 'login', 'admin2');
+        $manager = $user->getManager2();
+        $this->assertInstanceOf('MongoObjectTest\User', $manager);
+        $this->assertEquals($user->manager, $manager->manager);
+        $this->assertNull($user->getManagerBroken1());
+        $this->assertNull($user->getManagerBroken2());
+        $admin2 = $this->mapper->findObjectByProp('User', 'login', 'admin2');
         $user->manager = $admin2->getDBRef();
         $user->save();
         $admin2->delete();
@@ -170,8 +184,26 @@ class UserTest extends AbstractTestCase
 
     public function testRefreshOnIncompleteData()
     {
-        $user = $this->mapper->findObjectByProp('users', 'User', 'login', 'admin');
+        $user = $this->mapper->findObjectByProp('User', 'login', 'admin');
         $user->refresh();
         $this->assertNull($user->manager);
+    }
+
+    /**
+     * @depends testCreate
+     * @expectedException MongoObject\Exception
+     */
+    public function testUndefinedPropWrite(User $user)
+    {
+        $user->undefined = true;
+    }
+
+    /**
+     * @depends testCreate
+     * @expectedException MongoObject\Exception
+     */
+    public function testUndefinedPropRead(User $user)
+    {
+        $test = $user->undefined;
     }
 }

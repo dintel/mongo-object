@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Dmitry Zbarski
+ * @copyright Copyright (c) 2014-2015 Dmitry Zbarski
  */
 namespace MongoObject;
 
@@ -21,7 +21,8 @@ use ArrayObject;
  * directory.
  *
  * This class implements JsonSerializable, so objects of this class can be sent
- * to JavaScript using AJAX relatively simply.
+ * to JavaScript using AJAX relatively simply. When object is serialized to
+ * JSON, it's '_id' property is renamed to 'id'.
  */
 class Object implements JsonSerializable
 {
@@ -66,14 +67,9 @@ class Object implements JsonSerializable
     const TYPE_REFERENCE=7;
 
     /**
-     * @var array holds schema that defines properties of this class
+     * @var array holds schema that defines property types of this class
      */
     protected $_schema;
-
-    /**
-     * @var array holds actual values of properties
-     */
-    protected $_data;
 
     /**
      * @var MongoCollection collection in which object is stored
@@ -81,18 +77,16 @@ class Object implements JsonSerializable
     protected $_collection;
 
     /**
-     * @var string|null optional namespace in which subclasses are defined
-     */
-    protected $_modelsNamespace;
-
-    /**
-     * Add models namespace to type, if it is not null
+     * Get absolute name of type, including it's namespace
      * @param string $type type name
-     * @return string type name prepended with models namespace if it is not null
+     * @return string absolute type name
      */
     protected function getFullType($type)
     {
-        return $this->_modelsNamespace === null ? $type : "{$this->_modelsNamespace}\\{$type}";
+        if (strstr($type, '\\')) {
+            return $type;
+        }
+        return substr(static::class, 0, strrpos(static::class, '\\')) . "\\{$type}";
     }
 
     /**
@@ -100,20 +94,17 @@ class Object implements JsonSerializable
      * @param array $schema schema that defines properties of object
      * @param array $data properties values
      * @param MongoCollection $collection Mongo collection in which object is stored
-     * @param string|null $modelsNamespace Optional namespace name where
-     * MongoObject classes are defined
      */
-    public function __construct(array $schema, array $data, MongoCollection $collection, $modelsNamespace = null)
+    public function __construct(array $schema, array $data, MongoCollection $collection)
     {
         $this->_schema = $schema;
-        $this->_data = $data;
         $this->_collection = $collection;
-        $this->_modelsNamespace = $modelsNamespace;
 
         foreach ($this->_schema as $name => $desc) {
-            if (!isset($this->_data[$name])) {
-                $this->_data[$name] = null;
+            if (!property_exists(static::class, $name)) {
+                throw new Exception("Property {$name} is not defined in class " . static::class);
             }
+            $this->$name = isset($data[$name]) ? $data[$name] : null;
             $this->convertProperty($name);
         }
     }
@@ -127,49 +118,49 @@ class Object implements JsonSerializable
      */
     private function convertProperty($name)
     {
-        if (isset($this->_schema[$name]['null']) && $this->_schema[$name]['null'] && $this->_data[$name] === null) {
+        if (isset($this->_schema[$name]['null']) && $this->_schema[$name]['null'] && $this->$name === null) {
             return;
         }
 
         switch ($this->_schema[$name]['type']) {
         case Object::TYPE_ID:
-            if (!($this->_data[$name] instanceof MongoId) && $this->_data[$name] !== null) {
-                $this->_data[$name] = new MongoId($this->_data[$name]);
+            if (!($this->$name instanceof MongoId) && $this->$name !== null) {
+                $this->$name = new MongoId($this->$name);
             }
             break;
         case Object::TYPE_BOOL:
-            if (!is_bool($this->_data[$name])) {
-                $this->_data[$name] = (bool) $this->_data[$name];
+            if (!is_bool($this->$name)) {
+                $this->$name = (bool) $this->$name;
             }
             break;
         case Object::TYPE_INT:
-            if (!is_int($this->_data[$name])) {
-                $this->_data[$name] = (int) $this->_data[$name];
+            if (!is_int($this->$name)) {
+                $this->$name = (int) $this->$name;
             }
             break;
         case Object::TYPE_DOUBLE:
-            if (!is_double($this->_data[$name])) {
-                $this->_data[$name] = (double) $this->_data[$name];
+            if (!is_double($this->$name)) {
+                $this->$name = (double) $this->$name;
             }
             break;
         case Object::TYPE_STRING:
-            if (!is_string($this->_data[$name])) {
-                $this->_data[$name] = (string) $this->_data[$name];
+            if (!is_string($this->$name)) {
+                $this->$name = (string) $this->$name;
             }
             break;
         case Object::TYPE_ARRAY:
-            if (!is_array($this->_data[$name])) {
-                $this->_data[$name] = array();
+            if (!is_array($this->$name)) {
+                $this->$name = array();
             }
             break;
         case Object::TYPE_DATE:
-            if (!($this->_data[$name] instanceof MongoDate)) {
-                $this->_data[$name] = new MongoDate($this->_data[$name]);
+            if (!($this->$name instanceof MongoDate)) {
+                $this->$name = new MongoDate($this->$name);
             }
             break;
         case Object::TYPE_REFERENCE:
-            if (!MongoDBRef::isRef($this->_data[$name])) {
-                $this->_data[$name] = null;
+            if (!MongoDBRef::isRef($this->$name)) {
+                $this->$name = null;
             }
             break;
         default:
@@ -179,13 +170,25 @@ class Object implements JsonSerializable
     }
 
     /**
-     * Magic method that checks if property exist
-     * @param string $name name of property
-     * @return bool true if property is defined in schema, false otherwise
+     * Get data of this object as array
+     *
+     * @return array associative array of data
      */
-    public function __isset($name)
+    protected function getData()
     {
-        return isset($this->_data[$name]);
+        $data = [];
+        foreach ($this->_schema as $name => $desc) {
+            $data[$name] = $this->$name;
+            if (isset($desc['updateDate']) && $desc['updateDate']) {
+                $data[$name] = new MongoDate();
+            }
+        }
+        if ($data['_id'] === null) {
+            // @codeCoverageIgnoreStart
+            unset($data['_id']);
+            // @codeCoverageIgnoreEnd
+        }
+        return $data;
     }
 
     /**
@@ -204,7 +207,7 @@ class Object implements JsonSerializable
             throw new Exception("Property '{$name}' could not be set, it is hidden.");
         }
 
-        $this->_data[$name] = $value;
+        $this->$name = $value;
         $this->convertProperty($name);
     }
 
@@ -223,7 +226,17 @@ class Object implements JsonSerializable
             throw new Exception("Property '{$name}' could not be get, it is hidden.");
         }
 
-        return $this->_data[$name];
+        return $this->$name;
+    }
+
+    /**
+     * Magic method that checks whether property is defined
+     * @param string $name name of property
+     * @return bool true if defined, false otherwise
+     */
+    public function __isset($name)
+    {
+        return isset($this->$name);
     }
 
     /**
@@ -232,15 +245,14 @@ class Object implements JsonSerializable
      */
     public function save()
     {
-        if ($this->_data['_id'] === null) {
-            unset($this->_data['_id']);
+        $data = $this->getData();
+        if ($this->_collection->save($data, ["j" => true])['err'] === null) {
+            $this->_id = $data['_id'];
+            return true;
         }
-        if (isset($this->_data['modified'])) {
-            $this->_data['modified'] = new MongoDate();
-        }
-        file_put_contents("/tmp/dimatest", var_export($this->_data, true));
-        $this->_collection->save($this->_data, ["j" => true]);
-        return true;
+        // @codeCoverageIgnoreStart
+        return false;
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -276,26 +288,25 @@ class Object implements JsonSerializable
     }
 
     /**
-     * Fetch object using Mongo DBRef
-     * @param string $collectionName name of collection from which object should
-     * be fetched
+     * Fetch object using MongoDBRef
      * @param string $typeName name of class of object to fetch (will be
      * preprended with $this->_modelsNamespace)
      * @param array $dbref array holding Mongo DBRef reference to object
-     * @return mixed object
+     * @return mixed object or null if fetching failed
      */
-    protected function fetchDBRef($collectionName, $typeName, $dbref)
+    protected function fetchDBRef($typeName, $dbref)
     {
         $typeName = $this->getFullType($typeName);
-        $collection = $this->_collection->db->$collectionName;
-        if ($dbref === null) {
-            return null;
+        if (class_exists($typeName) && MongoDBRef::isRef($dbref)) {
+            $collectionName = $typeName::getCollection();
+            $collection = $this->_collection->db->$collectionName;
+            $data = $this->_collection->getDBRef($dbref);
+            if ($data === null) {
+                return null;
+            }
+            return new $typeName($data, $collection);
         }
-        $data = $this->_collection->getDBRef($dbref);
-        if ($data === null) {
-            return null;
-        }
-        return new $typeName($data, $collection, $this->_modelsNamespace);
+        return null;
     }
 
     /**
@@ -304,13 +315,12 @@ class Object implements JsonSerializable
      */
     public function refresh()
     {
-        if ($this->_data['_id'] !== null) {
-            $this->_data = $this->_collection->findOne(['_id' => $this->_data['_id']]);
+        if ($this->_id !== null) {
+            $data = $this->_collection->findOne(['_id' => $this->_id]);
             foreach ($this->_schema as $name => $desc) {
-                if (!isset($this->_data[$name])) {
-                    $this->_data[$name] = null;
+                if (isset($data[$name])) {
+                    $this->$name = $data[$name];
                 }
-                $this->convertProperty($name);
             }
         }
     }
@@ -321,14 +331,18 @@ class Object implements JsonSerializable
      */
     public function jsonSerialize()
     {
-        $jsonData = $this->_data;
+        $jsonData = $this->getData();
         if (isset($jsonData["_id"])) {
             $jsonData["id"] = (string)$jsonData["_id"];
+            // @codeCoverageIgnoreStart
             unset($jsonData["_id"]);
+            // @codeCoverageIgnoreEnd
         }
         foreach ($this->_schema as $name => $dsc) {
             if (@$dsc['hidden']) {
+                // @codeCoverageIgnoreStart
                 unset($jsonData[$name]);
+                // @codeCoverageIgnoreEnd
             }
         }
         return $jsonData;
@@ -341,6 +355,8 @@ class Object implements JsonSerializable
      */
     public function mergeData(array $data)
     {
-        $this->_data = $data + $this->_data;
+        foreach ($data as $name => $val) {
+            $this->$name = $val;
+        }
     }
 }

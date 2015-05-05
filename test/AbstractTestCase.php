@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
 
-namespace MongoObjecttest;
+namespace MongoObjectTest;
 
 use MongoClient;
 use MongoCollection;

@@ -1,7 +1,7 @@
 <?php
 /**
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
- * @copyright Copyright (c) 2014 Dmitry Zbarski
+ * @copyright Copyright (c) 2014-2015 Dmitry Zbarski
  */
 namespace MongoObject;
 
@@ -60,68 +60,77 @@ class Mapper
 
     /**
      * Find object by it's Mongo ID and return it
-     * @param string $table Name of Mongo collection in which object is stored
      * @param string $type Name of class of object that should be returned
      * @param mixed $id ID of document in Mongo collection that holds the object
      * @return mixed null if document not found, object of type $type otherwise
      */
-    public function findObject($table, $type, $id)
+    public function findObject($type, $id)
     {
         $type = $this->getFullType($type);
-        if (!($id instanceof MongoId) && $id !== null) {
-            try {
-                $id = new MongoId($id);
-            } catch (MongoException $e) {
-                $id = null;
+        if (class_exists($type)) {
+            $table = $type::getCollection();
+            if (!($id instanceof MongoId) && $id !== null) {
+                try {
+                    $id = new MongoId($id);
+                } catch (MongoException $e) {
+                    $id = null;
+                }
             }
+            $data = $this->mongodb->$table->findOne(['_id' => $id]);
+            if ($data === null) {
+                return null;
+            }
+            return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
         }
-        $data = $this->mongodb->$table->findOne(['_id' => $id]);
-        if ($data === null) {
-            return null;
-        }
-        return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+        return null;
     }
 
     /**
      * Find object by it's property value and return it
-     * @param string $table Name of Mongo collection in which object is stored
      * @param string $type Name of class of object that should be returned
      * @param string $name Name of property to match
      * @param mixed $value Value of property to match
      * @return mixed null if document not found, object of type $type otherwise
      */
-    public function findObjectByProp($table, $type, $name, $value)
+    public function findObjectByProp($type, $name, $value)
     {
         $type = $this->getFullType($type);
-        $data = $this->mongodb->$table->findOne([$name => $value]);
-        if ($data === null) {
-            return null;
+        if (class_exists($type)) {
+            $table = $type::getCollection();
+            $data = $this->mongodb->$table->findOne([$name => $value]);
+            if ($data === null) {
+                return null;
+            }
+            return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
         }
-        return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+        return null;
     }
 
     /**
      * Find all objects using Mongo selector and return them optionally ordered
-     * @param string $table Name of Mongo collection in which object is stored
      * @param string $type Name of class of object that should be returned
      * @param array $selector Mongo query used to match documents holding objects
      * @param array|null $order array if properties by which to sort (if value
      * is 1 sorted ascending, if -1 sorted descending)
      * @return array array of object matching selector ordered by $order, if specified
      */
-    public function fetchObjects($table, $type, array $selector = [], array $order = null)
+    public function fetchObjects($type, array $selector = [], array $order = null)
     {
         $type = $this->getFullType($type);
-        $cursor = $this->mongodb->$table->find($selector);
-        if ($order) {
-            $cursor->sort($order);
+        if (class_exists($type)) {
+            $table = $type::getCollection();
+            $cursor = $this->mongodb->$table->find($selector);
+            if ($order) {
+                $cursor->sort($order);
+            }
+            $result = [];
+            foreach ($cursor as $data) {
+                $obj = new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+                $result[] = $obj;
+            }
+            return $result;
         }
-        $result = [];
-        foreach ($cursor as $data) {
-            $obj = new $type($data, $this->mongodb->$table, $this->modelsNamespace);
-            $result[] = $obj;
-        }
-        return $result;
+        return null;
     }
 
     /**
@@ -139,15 +148,15 @@ class Mapper
 
     /**
      * Construct new object
-     * @param string $table Name of Mongo collection in which object is stored
      * @param string $type Name of class of object that should be constructed
      * @param array $data initial values of properties of new object
      * @return mixed new object of class $type or null of class $type does not exist
      */
-    public function newObject($table, $type, array $data = array())
+    public function newObject($type, array $data = array())
     {
         $type = $this->getFullType($type);
         if (class_exists($type)) {
+            $table = $type::getCollection();
             return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
         }
         return null;
