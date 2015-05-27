@@ -1,5 +1,6 @@
 <?php
 /**
+ * @author Dmitry Zbarski <dmitry.zbarski@gmail.com>
  * @license   http://opensource.org/licenses/BSD-3-Clause BSD-3-Clause
  * @copyright Copyright (c) 2014 Dmitry Zbarski
  */
@@ -10,7 +11,8 @@ use MongoCollection;
 use MongoDate;
 use MongoObject\MapperObject;
 
-class User extends Object implements MapperObject {
+class User extends Object implements MapperObject
+{
     public function __construct(array $data, MongoCollection $collection)
     {
         $schema = [
@@ -27,7 +29,11 @@ class User extends Object implements MapperObject {
             'active' => true,
             'created' => new MongoDate(),
         ];
-        parent::__construct($schema, $data + $defaults, $collection, "MongoObjectExample");
+        parent::__construct($schema, $data + $defaults, $collection);
+    }
+
+    public function getCollection() {
+        return "users";
     }
 
     public function checkPassword($password)
