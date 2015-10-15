@@ -103,6 +103,16 @@ class MapperTest extends AbstractTestCase
         $this->assertSame('admin', $users[0]->login);
         $this->assertSame('admin2', $users[1]->login);
 
+        $users = $this->mapper->fetchObjects('User', ['type' => User::TYPE_ADMIN], ['login' => 1], 1);
+        $this->assertSame(1, count($users));
+        $this->assertInstanceOf('MongoObjectTest\User', $users[0]);
+        $this->assertSame('admin', $users[0]->login);
+
+        $users = $this->mapper->fetchObjects('User', ['type' => User::TYPE_ADMIN], ['login' => 1], null, 1);
+        $this->assertSame(1, count($users));
+        $this->assertInstanceOf('MongoObjectTest\User', $users[0]);
+        $this->assertSame('admin2', $users[0]->login);
+
         $users = $this->mapper->fetchObjects('User', ['type' => 100]);
         $this->assertSame(0, count($users));
     }

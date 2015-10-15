@@ -112,9 +112,11 @@ class Mapper
      * @param array $selector Mongo query used to match documents holding objects
      * @param array|null $order array if properties by which to sort (if value
      * is 1 sorted ascending, if -1 sorted descending)
+     * @param int|null $limit maximum number of objects to return
+     * @param int|null $skip number of objects to skip
      * @return array array of object matching selector ordered by $order, if specified
      */
-    public function fetchObjects($type, array $selector = [], array $order = null)
+    public function fetchObjects($type, array $selector = [], array $order = null, $limit = null, $skip = null)
     {
         $type = $this->getFullType($type);
         if (class_exists($type)) {
@@ -122,6 +124,12 @@ class Mapper
             $cursor = $this->mongodb->$table->find($selector);
             if ($order) {
                 $cursor->sort($order);
+            }
+            if ($limit) {
+                $cursor->limit($limit);
+            }
+            if ($skip) {
+                $cursor->skip($skip);
             }
             $result = [];
             foreach ($cursor as $data) {
