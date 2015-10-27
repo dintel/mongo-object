@@ -357,6 +357,7 @@ class Object implements JsonSerializable
     {
         foreach ($data as $name => $val) {
             $this->$name = $val;
+            $this->convertProperty($name);
         }
     }
 }

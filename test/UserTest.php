@@ -76,6 +76,25 @@ class UserTest extends AbstractTestCase
 
     /**
      * @depends testCreate
+     */
+    public function testMergeData(User $user)
+    {
+        $user->mergeData([
+            '_id' => null,
+            'age' => "none",
+        ]);
+        $this->assertNull($user->_id);
+        $this->assertInternalType('string', $user->login);
+        $this->assertInternalType('integer', $user->type);
+        $this->assertInternalType('string', $user->name);
+        $this->assertInternalType('boolean', $user->active);
+        $this->assertInternalType('array', $user->groups);
+        $this->assertInternalType('double', $user->age);
+        $this->assertInstanceOf('MongoDate', $user->created);
+    }
+
+    /**
+     * @depends testCreate
      * @expectedException MongoObject\Exception
      */
     public function testHiddenPropRead(User $user)
