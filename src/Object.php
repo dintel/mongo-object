@@ -356,8 +356,10 @@ class Object implements JsonSerializable
     public function mergeData(array $data)
     {
         foreach ($data as $name => $val) {
-            $this->$name = $val;
-            $this->convertProperty($name);
+            if (isset($this->_schema[$name])) {
+                $this->$name = $val;
+                $this->convertProperty($name);
+            }
         }
     }
 }

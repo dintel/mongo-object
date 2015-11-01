@@ -82,6 +82,8 @@ class UserTest extends AbstractTestCase
         $user->mergeData([
             '_id' => null,
             'age' => "none",
+            'unknown' => 'property',
+            'should' => 'be ignored',
         ]);
         $this->assertNull($user->_id);
         $this->assertInternalType('string', $user->login);
@@ -91,6 +93,7 @@ class UserTest extends AbstractTestCase
         $this->assertInternalType('array', $user->groups);
         $this->assertInternalType('double', $user->age);
         $this->assertInstanceOf('MongoDate', $user->created);
+
     }
 
     /**
