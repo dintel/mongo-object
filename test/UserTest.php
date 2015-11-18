@@ -93,7 +93,6 @@ class UserTest extends AbstractTestCase
         $this->assertInternalType('array', $user->groups);
         $this->assertInternalType('double', $user->age);
         $this->assertInstanceOf('MongoDate', $user->created);
-
     }
 
     /**

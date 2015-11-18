@@ -15,5 +15,4 @@ interface MapperObject
 {
     public function __construct(array $data, MongoCollection $collection);
     public static function getCollection();
-
 }

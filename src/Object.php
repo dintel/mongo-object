@@ -150,7 +150,7 @@ class Object implements JsonSerializable
             break;
         case Object::TYPE_ARRAY:
             if (!is_array($this->$name)) {
-                $this->$name = array();
+                $this->$name = [];
             }
             break;
         case Object::TYPE_DATE:

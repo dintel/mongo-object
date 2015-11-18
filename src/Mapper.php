@@ -147,7 +147,7 @@ class Mapper
      * @param array $query Mongo select query, only objects matching it are counted
      * @return mixed number of objects matching query or false if class $type does not exist
      */
-    public function countObjects($type, $query = array())
+    public function countObjects($type, $query = [])
     {
         $type = $this->getFullType($type);
         if (class_exists($type)) {
@@ -163,7 +163,7 @@ class Mapper
      * @param array $data initial values of properties of new object
      * @return mixed new object of class $type or null if class $type does not exist
      */
-    public function newObject($type, array $data = array())
+    public function newObject($type, array $data = [])
     {
         $type = $this->getFullType($type);
         if (class_exists($type)) {
@@ -204,7 +204,6 @@ class Mapper
             $collection = $type::getCollection();
             $result = $this->mongodb->$collection->remove($query);
             return $result['ok'] ? $result['n'] : false;
-
         }
         return false;
     }

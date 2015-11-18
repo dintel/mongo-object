@@ -28,7 +28,7 @@ class Bootstrap
 
         static::initAutoloader();
 
-        $baseConfig = array();
+        $baseConfig = [];
         $config = ArrayUtils::merge($baseConfig, $testConfig);
 
         $serviceManager = new ServiceManager(new ServiceManagerConfig());
