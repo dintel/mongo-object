@@ -49,6 +49,9 @@ class MapperTest extends AbstractTestCase
         $this->assertNull($user);
     }
 
+    /**
+     * @depends testFindObject
+     */
     public function testFindObjectByProp()
     {
         $user = $this->mapper->findObjectByProp('User', 'login', 'admin2');
@@ -65,16 +68,22 @@ class MapperTest extends AbstractTestCase
         $this->assertNull($user);
     }
 
+    /**
+     * @depends testFindObjectByProp
+     */
     public function testCountObjects()
     {
-        $this->assertSame(0, $this->mapper->countObjects('users', ['type' => 100]));
-        $this->assertSame(2, $this->mapper->countObjects('users', ['type' => User::TYPE_ADMIN]));
-        $this->assertSame(1, $this->mapper->countObjects('users', ['type' => User::TYPE_GUEST]));
-        $this->assertSame(3, $this->mapper->countObjects('users', []));
-        $this->assertSame(0, $this->mapper->countObjects('none', ['type' => User::TYPE_ADMIN]));
-        $this->assertSame(0, $this->mapper->countObjects('users', ['none' => 1]));
+        $this->assertSame(0, $this->mapper->countObjects('User', ['type' => 100]));
+        $this->assertSame(2, $this->mapper->countObjects('User', ['type' => User::TYPE_ADMIN]));
+        $this->assertSame(1, $this->mapper->countObjects('User', ['type' => User::TYPE_GUEST]));
+        $this->assertSame(3, $this->mapper->countObjects('User', []));
+        $this->assertSame(false, $this->mapper->countObjects('UnkonwnType', ['type' => User::TYPE_ADMIN]));
+        $this->assertSame(0, $this->mapper->countObjects('User', ['none' => 1]));
     }
 
+    /**
+     * @depends testCountObjects
+     */
     public function testNewObject()
     {
         $user = $this->mapper->newObject('User', $this->data);
@@ -84,11 +93,17 @@ class MapperTest extends AbstractTestCase
         $this->assertNull($user);
     }
 
+    /**
+     * @depends testNewObject
+     */
     public function testMagicGet()
     {
         $this->assertInstanceOf('MongoDB', $this->mapper->mongodb);
     }
 
+    /**
+     * @depends testMagicGet
+     */
     public function testFetchObjects()
     {
         $users = $this->mapper->fetchObjects('User', ['type' => User::TYPE_ADMIN]);
@@ -117,10 +132,41 @@ class MapperTest extends AbstractTestCase
         $this->assertSame(0, count($users));
     }
 
+    /**
+     * @depends testFetchObjects
+     */
     public function testErrors()
     {
         $this->assertNull($this->mapper->findObject('UnknownClass', 1));
         $this->assertNull($this->mapper->findObjectByProp('UnknownClass', 'attr', 'val'));
         $this->assertNull($this->mapper->fetchObjects('UnknownClass'));
+    }
+
+    /**
+     * @depends testErrors
+     */
+    public function testUpdate()
+    {
+        $result = $this->mapper->updateObjects('User', ['type' => User::TYPE_ADMIN], ['age' => 6]);
+        $this->assertSame($result, 2);
+        $users = $this->mapper->fetchObjects('User', ['age' => 6.0]);
+        $this->assertSame(2, count($users));
+        $this->assertSame(6.0, $users[0]->age);
+        $this->assertSame(6.0, $users[1]->age);
+
+        $result = $this->mapper->updateObjects('UnknownType', ['type' => User::TYPE_ADMIN], ['age' => 6]);
+        $this->assertSame($result, false);
+    }
+
+    /**
+     * @depends testUpdate
+     */
+    public function testDelete()
+    {
+        $result = $this->mapper->deleteObjects('UnknownType', ['type' => User::TYPE_ADMIN]);
+        $this->assertSame($result, false);
+
+        $result = $this->mapper->deleteObjects('User', ['age' => 6.0]);
+        $this->assertSame($result, true);
     }
 }
