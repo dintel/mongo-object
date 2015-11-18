@@ -195,7 +195,7 @@ class Mapper
      * Delete multiple objects
      * @param string $type Objects of which class should be deleted
      * @param array $query Mongo select query, only objects matching it are deleted
-     * @return mixed number of objects deleted or false in case of error
+     * @return bool true on succes, false on failure
      */
     public function deleteObjects($type, array $query = [])
     {
@@ -203,7 +203,7 @@ class Mapper
         if (class_exists($type)) {
             $collection = $type::getCollection();
             $result = $this->mongodb->$collection->remove($query);
-            return $result['ok'] ? $result['n'] : false;
+            return (bool) $result['ok'];
         }
         return false;
     }
