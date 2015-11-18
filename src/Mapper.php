@@ -169,4 +169,22 @@ class Mapper
         }
         return null;
     }
+
+    /**
+     * Update multiple objects
+     * @param string $type Name of object which collection should be updated
+     * @param array $query Mongo select query, only objects matching it are updated
+     * @param array $data new values for fields of objects
+     * @return mixed number of objects updated or false in case of error
+     */
+    public function updateObjects($type, array $query, array $data)
+    {
+        $type = $this->getFullType($type);
+        if (class_exists($type)) {
+            $collection = $type::getCollection();
+            $result = $this->mongodb->$collection->update($query, ['$set' => $data], ['multiple' => true]);
+            return $result['ok'] ? $result['n'] : false;
+        }
+        return false;
+    }
 }
