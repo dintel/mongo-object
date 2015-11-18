@@ -187,4 +187,22 @@ class Mapper
         }
         return false;
     }
+
+    /**
+     * Delete multiple objects
+     * @param string $type Objects of which class should be deleted
+     * @param array $query Mongo select query, only objects matching it are deleted
+     * @return mixed number of objects deleted or false in case of error
+     */
+    public function deleteObjects($type, array $query = [])
+    {
+        $type = $this->getFullType($type);
+        if (class_exists($type)) {
+            $collection = $type::getCollection();
+            $result = $this->mongodb->$collection->remove($query);
+            return $result['ok'] ? $result['n'] : false;
+
+        }
+        return false;
+    }
 }
