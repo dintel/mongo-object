@@ -143,15 +143,18 @@ class Mapper
 
     /**
      * Count objects in collection matching Mongo query
-     * @param string $table name of Mongo collection in which objects are
-     * counted
+     * @param string $type Name of class of objects that should be counted
      * @param array $query Mongo select query, only objects matching it are counted
-     * @return int number of objects matching query
+     * @return mixed number of objects matching query or false if class $type does not exist
      */
-    public function countObjects($table, $query = array())
+    public function countObjects($type, $query = array())
     {
-        $cursor = $this->mongodb->$table->find($query);
-        return $cursor->count();
+        $type = $this->getFullType($type);
+        if (class_exists($type)) {
+            $table = $type::getCollection();
+            return $this->mongodb->$table->find($query)->count();
+        }
+        return false;
     }
 
     /**
