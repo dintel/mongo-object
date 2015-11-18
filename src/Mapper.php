@@ -158,7 +158,7 @@ class Mapper
      * Construct new object
      * @param string $type Name of class of object that should be constructed
      * @param array $data initial values of properties of new object
-     * @return mixed new object of class $type or null of class $type does not exist
+     * @return mixed new object of class $type or null if class $type does not exist
      */
     public function newObject($type, array $data = array())
     {
