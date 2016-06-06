@@ -223,4 +223,13 @@ class Mapper
         }
         return false;
     }
+
+    /**
+     * Getter for Mapper cache
+     * @return Cache cache of this mapper
+     */
+    public function getCache()
+    {
+        return $this->cache;
+    }
 }
