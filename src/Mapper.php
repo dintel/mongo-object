@@ -152,7 +152,7 @@ class Mapper
         $type = $this->getFullType($type);
         if (class_exists($type)) {
             $table = $type::getCollection();
-            return $this->mongodb->$table->find($query)->count();
+            return $this->mongodb->$table->find($query, ['_id' => true])->count();
         }
         return false;
     }
