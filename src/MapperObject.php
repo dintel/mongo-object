@@ -13,6 +13,6 @@ use MongoCollection;
  */
 interface MapperObject
 {
-    public function __construct(array $data, MongoCollection $collection);
+    public function __construct(array $data, MongoCollection $collection, Cache $cache);
     public static function getCollection();
 }

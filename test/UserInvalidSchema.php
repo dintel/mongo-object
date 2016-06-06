@@ -5,6 +5,7 @@
  */
 namespace MongoObjectTest;
 
+use MongoObject\Cache;
 use MongoObject\Object;
 use MongoCollection;
 use MongoDate;
@@ -25,7 +26,7 @@ class UserInvalidSchema extends Object
     protected $created;
     protected $manager;
 
-    public function __construct(array $data, MongoCollection $collection)
+    public function __construct(array $data, MongoCollection $collection, Cache $cache)
     {
         $schema = [
             '_id' => ['type' => Object::TYPE_ID, 'null' => false],
@@ -44,7 +45,7 @@ class UserInvalidSchema extends Object
             'groups' => [],
             'created' => new MongoDate(),
         ];
-        parent::__construct($schema, $data + $defaults, $collection);
+        parent::__construct($schema, $data + $defaults, $collection, $cache);
     }
 
     public function checkPassword($password)

@@ -27,6 +27,11 @@ class Mapper
     private $modelsNamespace;
 
     /**
+     * @var string Caching service
+     */
+    private $cache;
+
+    /**
      * Constructor
      * @param MongoDB $mongodb Mongo database to work with
      * @param string|null $modelsNamespace optional namespace in which
@@ -36,6 +41,11 @@ class Mapper
     {
         $this->mongodb = $mongodb;
         $this->modelsNamespace = $modelsNamespace;
+        if (function_exists("zend_shm_cache_store")) {
+            $this->cache = new ZendDataCacheShm();
+        } else {
+            $this->cache = new NullCache();
+        }
     }
 
     /**
@@ -76,11 +86,17 @@ class Mapper
                     $id = null;
                 }
             }
-            $data = $this->mongodb->$table->findOne(['_id' => $id]);
+            $data = $this->cache->fetch("{$table}_{$id}");
+            if (!is_array($data)) {
+                $data = $this->mongodb->$table->findOne(['_id' => $id]);
+                if (is_array($data)) {
+                    $this->cache->store("{$table}_{$id}", $data);
+                }
+            }
             if ($data === null) {
                 return null;
             }
-            return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+            return new $type($data, $this->mongodb->$table, $this->cache);
         }
         return null;
     }
@@ -101,7 +117,7 @@ class Mapper
             if ($data === null) {
                 return null;
             }
-            return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+            return new $type($data, $this->mongodb->$table, $this->cache);
         }
         return null;
     }
@@ -133,7 +149,7 @@ class Mapper
             }
             $result = [];
             foreach ($cursor as $data) {
-                $obj = new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+                $obj = new $type($data, $this->mongodb->$table, $this->cache);
                 $result[] = $obj;
             }
             return $result;
@@ -168,7 +184,7 @@ class Mapper
         $type = $this->getFullType($type);
         if (class_exists($type)) {
             $table = $type::getCollection();
-            return new $type($data, $this->mongodb->$table, $this->modelsNamespace);
+            return new $type($data, $this->mongodb->$table, $this->cache);
         }
         return null;
     }

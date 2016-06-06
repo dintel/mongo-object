@@ -5,6 +5,7 @@
  */
 namespace MongoObjectTest;
 
+use MongoObject\Cache;
 use MongoObject\Object;
 use MongoObject\MapperObject;
 use MongoCollection;
@@ -28,7 +29,7 @@ class User extends Object implements MapperObject
     protected $manager;
     protected $modified;
 
-    public function __construct(array $data, MongoCollection $collection)
+    public function __construct(array $data, MongoCollection $collection, Cache $cache)
     {
         $schema = [
             '_id' => ['type' => Object::TYPE_ID, 'null' => false],
@@ -49,7 +50,7 @@ class User extends Object implements MapperObject
             'created' => new MongoDate(),
             'modified' => new MongoDate(),
         ];
-        parent::__construct($schema, $data + $defaults, $collection);
+        parent::__construct($schema, $data + $defaults, $collection, $cache);
     }
 
     public function checkPassword($password)

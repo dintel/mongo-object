@@ -10,6 +10,8 @@ use MongoDBRef;
 
 class UserTest extends AbstractTestCase
 {
+    private $cache;
+
     public function setUp()
     {
         parent::setUp();
@@ -23,11 +25,12 @@ class UserTest extends AbstractTestCase
             'created' => new MongoDate(),
             'manager' => null,
         ];
+        $this->cache = new \MongoObject\NullCache(null);
     }
 
     public function testCreate()
     {
-        $user = new User($this->data, $this->collection);
+        $user = new User($this->data, $this->collection, $this->cache);
         $this->assertNull($user->_id);
         $this->assertSame($this->data['login'], $user->login);
         $this->assertSame($this->data['type'], $user->type);
@@ -154,7 +157,7 @@ class UserTest extends AbstractTestCase
     public function testDelete(User $user)
     {
         $this->assertTrue($user->delete());
-        $user = new User($this->data, $this->collection);
+        $user = new User($this->data, $this->collection, $this->cache);
         $this->assertFalse($user->delete());
     }
 

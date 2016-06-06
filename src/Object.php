@@ -77,6 +77,11 @@ class Object implements JsonSerializable
     protected $_collection;
 
     /**
+     * @var Cache cache that can be used to find MongoDBRefs
+     */
+    protected $_cache;
+
+    /**
      * Get absolute name of type, including it's namespace
      * @param string $type type name
      * @return string absolute type name
@@ -94,11 +99,13 @@ class Object implements JsonSerializable
      * @param array $schema schema that defines properties of object
      * @param array $data properties values
      * @param MongoCollection $collection Mongo collection in which object is stored
+     * @param Cache cacher that is used by Mapper created this Object
      */
-    public function __construct(array $schema, array $data, MongoCollection $collection)
+    public function __construct(array $schema, array $data, MongoCollection $collection, Cache $cache)
     {
         $this->_schema = $schema;
         $this->_collection = $collection;
+        $this->_cache = $cache;
 
         foreach ($this->_schema as $name => $desc) {
             if (!property_exists(static::class, $name)) {
@@ -300,11 +307,14 @@ class Object implements JsonSerializable
         if (class_exists($typeName) && MongoDBRef::isRef($dbref)) {
             $collectionName = $typeName::getCollection();
             $collection = $this->_collection->db->$collectionName;
-            $data = $this->_collection->getDBRef($dbref);
+            $data = $this->_cache->fetch("{$collectionName}_{$dbref['$id']}");
+            if ($data === null) {
+                $data = $this->_collection->getDBRef($dbref);
+            }
             if ($data === null) {
                 return null;
             }
-            return new $typeName($data, $collection);
+            return new $typeName($data, $collection, $this->_cache);
         }
         return null;
     }

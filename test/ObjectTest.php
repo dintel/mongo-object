@@ -7,8 +7,11 @@ namespace MongoObjectTest;
 
 class ObjectTest extends AbstractTestCase
 {
+    private $cache;
+
     public function setUp()
     {
+        $this->cache = new \MongoObject\NullCache(null);
         parent::setUp();
     }
 
@@ -17,7 +20,7 @@ class ObjectTest extends AbstractTestCase
      */
     public function testInvalidSchema()
     {
-        $user = new UserInvalidSchema([], $this->collection);
+        $user = new UserInvalidSchema([], $this->collection, $this->cache);
     }
 
     /**
@@ -25,6 +28,6 @@ class ObjectTest extends AbstractTestCase
      */
     public function testInvalidType()
     {
-        $user = new UserInvalidType([], $this->collection);
+        $user = new UserInvalidType([], $this->collection, $this->cache);
     }
 }
