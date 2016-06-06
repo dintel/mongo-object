@@ -255,6 +255,7 @@ class Object implements JsonSerializable
         $data = $this->getData();
         if ($this->_collection->save($data, ["j" => true])['err'] === null) {
             $this->_id = $data['_id'];
+            $this->_cache->store(static::getCollection()."_{$this->_id}", $data);
             return true;
         }
         // @codeCoverageIgnoreStart
@@ -270,6 +271,7 @@ class Object implements JsonSerializable
     {
         if (!$this->isNew()) {
             $this->_collection->remove(['_id' => $this->_id]);
+            $this->_cache->delete(static::getCollection()."_{$this->_id}");
             return true;
         }
         return false;
